@@ -31,7 +31,7 @@ def send_to_slack(message, event):
 
   msg = {
     'username': 'Deep Security',
-    'icon_url': 'https://github.com/deep-security/amazon-guardduty/docs/deep-security.png?raw=true',
+    'icon_url': 'https://github.com/deep-security/amazon-guardduty/docs/trend-micro.png?raw=true',
     'text': message,
     "attachments": [
         {
@@ -39,7 +39,7 @@ def send_to_slack(message, event):
             "color": "#36a64f",
             "author_name": "Amazon GuardDuty Finding",
             "author_link": "https://github.com/deep-security/amazon-guardduty/",
-            "author_icon": "https://github.com/deep-security/amazon-guardduty/docs/deep-security.png?raw=true",
+            "author_icon": "https://github.com/deep-security/amazon-guardduty/docs/trend-micro.png?raw=true",
             "title": "{} - {}".format(event['detail']['title'], event['id']),
             "title_link": "https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings/",
             "text": "The finding is of type {} and has beens seen {} times. The last time was at {}".format(event['detail']['type'], event['detail']['service']['count'], event['detail']['service']['eventLastSeen']),
