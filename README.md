@@ -10,6 +10,20 @@ Combined together, Deep Security can use the intelligence and insight generated 
 
 ![Integrated Workflow](https://github.com/deep-security/amazon-guardduty/blob/master/docs/integrated-workflow.png?raw=true "Integrated Trend Micro Deep Security and Amazon GuardDuty workflow")
 
+## Workflows
+
+This integration supports workflows around the following findings:
+
+- *Recon:EC2/PortProbeUnprotectedPort* > when this finding is raised, Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy. If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
+
+- *Recon:EC2/Portscan* > when this finding is raised, Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy. If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
+
+- *UnauthorizedAccess:EC2/MaliciousIPCaller.Custom* > when this finding is raised, Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy. It will also run integrity and malware scans to spot abnormal or malicious behaviours. If requested, Deep Security will also enable intrusion prevention, anti-malware, and integrity monitoring on the instance if it isn't already active
+
+- *UnauthorizedAccess:EC2/SSHBruteForce* > when this finding is raised, Deep Security will run an integrity scan to ensure that critical files haven't been tampered with. It will also run a recommendation scan to ensure the instance has an appropriate security policy. It will also run integrity and malware scans to spot abnormal or malicious behaviours. IF requested, Deep Security will also enable intrusion prevention and integrity monitoring on the instance if it isn't already active
+
+- *CryptoCurrency:\** > when this finding is raised, Deep Security will run a malware scan to ensure the instance hasn't been infected. If requested, Deep Security will also enable anti-malware on the instance if it isn't already active
+
 ## Support
 
 This is a community project and while you will see contributions from the Deep Security team, there is no official Trend Micro support for this project. The official documentation for the Deep Security APIs is available from the [Trend Micro Online Help Centre](http://docs.trendmicro.com/en-us/enterprise/deep-security.aspx). 
@@ -17,6 +31,7 @@ This is a community project and while you will see contributions from the Deep S
 Tutorials, feature-specific help, and other information about Deep Security is available from the [Deep Security Help Center](https://help.deepsecurity.trendmicro.com/Welcome.html). 
 
 For Deep Security specific issues, please use the regular Trend Micro support channels. For issues with the code in this repository, please [open an issue here on GitHub](https://github.com/deep-security/amazon-guarduty/issues).
+
 
 ## Permissions In Deep Security
 

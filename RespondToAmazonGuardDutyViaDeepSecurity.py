@@ -191,4 +191,3 @@ def lambda_handler(event, context):
       send_to_slack("Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for malware".format(computer_name), event)
   else:
     print("Event received is not from Amazon GuardDuty")
-    print(event)
