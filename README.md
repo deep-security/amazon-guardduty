@@ -61,9 +61,11 @@ For Deep Security specific issues, please use the regular Trend Micro support ch
 
 Deep Security uses policies to apply security controls and configurations to your EC2 instances and ECS hosts. These policies allow fine-grained control over the protection that Deep Security applies. **But** in most cases, you don't need to dive into the specifics. The anti-malware and web reputation controls are basically "set and forget". The firewall has limited use within AWS as security groups do a fantastic job (though you still may want a unified firewall across all environments or to leverage it's advanced logging capabilities). 
 
-The intrusion prevention, integrity monitoring, and log inspection controls allow for the automatic application of rules based on 
+The intrusion prevention, integrity monitoring, and log inspection controls allow for the automatic application of rules based on recommendations made by Deep Security. It is [**strongly recommended**](https://help.deepsecurity.trendmicro.com/best-practice-guide.html) that you implement this feature. For your Base Policy (or any policy), simply check the option for each of the modules on the detail page for that module.
 
 ![Automatically Implement Rule Recommendations](https://github.com/deep-security/amazon-guardduty/blob/master/docs/ds-automatically-apply-rules.png?raw=true "Automatically implement rule recommendations (when possible)")
+
+For the record, [Application Control is also very simple to use](https://help.deepsecurity.trendmicro.com/Protection-Modules/Application-Control/detect-drift.html?Highlight=application%20control) but should be built into your CI/CD workflow. 
 
 
 ## Permissions In Deep Security
