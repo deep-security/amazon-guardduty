@@ -2,6 +2,10 @@
 
 An AWS Lambda function to create a joint workflow between Amazon GuardDuty and Deep Security.
 
+![General Workflow](https://github.com/deep-security/amazon-guardduty/docs/general-workflow.png?raw=true "General Trend Micro Deep Security and Amazon GuardDuty workflows")
+
+![Integrated Workflow](https://github.com/deep-security/amazon-guardduty/docs/integrated-workflow.png?raw=true "Integrated Trend Micro Deep Security and Amazon GuardDuty workflow")
+
 ## Support
 
 This is a community project and while you will see contributions from the Deep Security team, there is no official Trend Micro support for this project. The official documentation for the Deep Security APIs is available from the [Trend Micro Online Help Centre](http://docs.trendmicro.com/en-us/enterprise/deep-security.aspx). 
