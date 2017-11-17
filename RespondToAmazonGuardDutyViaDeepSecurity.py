@@ -78,7 +78,7 @@ def send_to_slack(message, event):
             "text": "The finding is of type {} and has beens seen {} times. The last time was at {}".format(event['detail']['type'], event['detail']['service']['count'], event['detail']['service']['eventLastSeen']),
             "fields": [
                 {
-                    "title": "Priority",
+                    "title": "Severity",
                     "value": event['detail']['severity'],
                     "short": False
                 }
@@ -222,8 +222,8 @@ def lambda_handler(event, context):
     instance_id = get_affected_instance_id(event)
     instance_in_ds = get_affected_instance_in_deep_security(instance_id)
     computer_name = "Instance is not registered in Deep Security" 
-    if instance_in_ds and "computer_name" in dir(instance_in_ds):
-        computer_name = instance_in_ds.computer_name
+    if instance_in_ds and "name" in dir(instance_in_ds):
+        computer_name = instance_in_ds.name
     finding_id = event['id']
 
     # route the event to a specific action
