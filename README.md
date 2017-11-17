@@ -175,6 +175,8 @@ These are expected warnings. Can you tell that we (and the python core teams) ar
 
 ## Testing
 
-Generating fi
+The integration is triggered when Amazon GuardDuty generates a finding. It can be useful to force the generation of a finding. The simplest of these is a portscan. Run the following ```nmap``` command to trigger a finding.
 
 ```nnamp -sX DESTINATION_IP```
+
+A faster feedback loop is to use the set of sample events included in the ```sample-events``` folder in this repo. Simply add these to AWS Lambda was test events and run them against the integration function. This will test the workflow on demand.
