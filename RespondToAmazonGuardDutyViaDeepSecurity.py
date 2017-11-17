@@ -6,6 +6,7 @@ import os
 import urllib2
 
 # 3rd party dependencies
+import deepsecurity
 
 # settings
 ENABLE_SLACK = False
@@ -22,6 +23,36 @@ def is_event_from_guardduty(event):
     result = True
 
   return result
+
+def sign_in_to_deep_security():
+  """
+  Sign in to Deep Security
+  """
+  global DSM
+
+  if not os.environ.has_key('dsUsername') or not os.environ.has_key('dsPassword'):
+    print("dsUsername and dsPassword are REQUIRED environment variables for this AWS Lambda function")
+    return None
+
+  ds_username = os.environ['dsUsername']
+  ds_password = os.environ['dsPassword']
+  ds_tenant = None
+  if os.environ.has_key('dsTenant'): ds_tenant = os.environ['dsTenant']
+  ds_hostname = None
+  if os.environ.has_key('dsHostname'): ds_hostname = os.environ['dsHostname']
+  ds_port = None
+  if os.environ.has_key('dsPort'): ds_port = os.environ['dsPort']
+  ds_ignore_ssl_validation = None
+  if os.environ.has_key('dsIgnoreSslValidation'): ds_ignore_ssl_validation = os.environ['dsIgnoreSslValidation']
+
+  try:
+    DSM = deepsecurity.dsm.Manager(username=ds_username, password=ds_password, tenant=ds_tenant)
+    DSM.sign_in()
+    DSM.computers.get()
+    DSM.policies.get()
+    print("Signed into Deep Security")
+  except Exception, ex:
+    print("Could not successfully sign into Deep Security. Threw exception: {}".format(ex))
 
 def send_to_slack(message, event):
   """
@@ -74,7 +105,7 @@ def print_event(event):
   except Exception, ex:
       print(ex)
 
-def get_affected_instance_in_deep_security(dsm, instance_id):
+def get_affected_instance_in_deep_security(instance_id):
   """
   Find and return the specified instance in Deep Security
 
@@ -82,10 +113,13 @@ def get_affected_instance_in_deep_security(dsm, instance_id):
   """
   result = None
 
+  if not DSM: return result
+
   try:
-    computers = dsm.computers.find(cloud_object_instance_id=instance_id)
+    computers = DSM.computers.find(cloud_object_instance_id=instance_id)
     if len(computers) > 0:
-      result = computers[0]
+      result = DSM.computers[computers[0]]
+      print("Found the instance in Deep Security as computer {}".format(result.name))
   except Exception, ex:
     print("Could not find the instance in Deep Security. Threw exception: {}".format(ex))
 
@@ -182,9 +216,11 @@ def lambda_handler(event, context):
     event_type = event['detail']['type']
     print("Processing Amazon GuardDuty event of type [{}]".format(event_type))
 
+    sign_in_to_deep_security()
+
     # get the relevant details regardless of action that needs to be taken
     instance_id = get_affected_instance_id(event)
-    instance_in_ds = get_affected_instance_in_deep_security(None, instance_id)
+    instance_in_ds = get_affected_instance_in_deep_security(instance_id)
     computer_name = "Instance is not registered in Deep Security" 
     if instance_in_ds and "computer_name" in dir(instance_in_ds):
         computer_name = instance_in_ds.computer_name
@@ -242,6 +278,14 @@ def lambda_handler(event, context):
 
         # make sure that IPS is on and active
         ips_result = enable_ips_for_instance_in_ds(instance_in_ds)
+
+        msg = "Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date. Deep Security is also running an integrity scan and a malware scan just in case.".format(computer_name)
+        if ips_result == "already enabled":
+          msg += " Intrusion prevention is already active on this instance"
+        elif ips_result == "enabled":
+          msg += " As a result, Deep Security has now activated intrusion prevention on this instance"
+
+        send_to_slack(msg, event)
       else:
         msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
         send_to_slack(msg, event)
@@ -290,5 +334,11 @@ def lambda_handler(event, context):
       msg = "Amazon GuardDuty generated a <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding>. Details are available within the Amazon GuardDuty Management Console"
       send_to_slack(msg, event)
         
+
+    # clean up
+    if DSM and "sign_out" in dir(DSM):
+      try:
+        DSM.sign_out()
+      except Exception, ex: pass
   else:
     print("Event received is not from Amazon GuardDuty")

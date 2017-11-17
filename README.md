@@ -26,7 +26,7 @@ This integration supports workflows around the following findings:
 	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
 	- Deep Security will run an integrity scan to ensure that critical files have not changed
 	- Deep Security will run a malware scan to look for infections or malicious activity
-	- If requested, Deep Security will also enable intrusion prevention, anti-malware, and integrity monitoring on the instance if it isn't already active
+	- If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
 
 - **UnauthorizedAccess:EC2/SSHBruteForce** when this finding is raised:
 	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
