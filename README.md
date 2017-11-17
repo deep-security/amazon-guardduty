@@ -37,12 +37,12 @@ Make sure you assign the Role to the user. This will ensure that your API access
 
 ## AWS Lambda Configuration
 
-For each of these rules, the AWS Lambda configuration is the same. Please make sure to configure the following;
+Please make sure to configure the following;
 
-- Handler: filename_for_the_rule.aws_config_rule_handler
-- Role: a role with at least the rights as shown in [dsConfigRulePolicy.json](/dsConfigRulePolicy.json). **Remember** to change line 18 to reflect your S3 bucket information (BUCKET/PATH/TO/OBJECTS/*)
+- Handler: RespondToAmazonGuardDutyViaDeepSecurity.lambda_handler
+- Role: basic Lambda invoke is required. Consider adding [AWS X-Ray permissions](http://docs.aws.amazon.com/xray/latest/devguide/xray-permissions.html) for better visibility
 - (Advanced Settings) Memory: 128 MB
-- (Advanced Settings) Timeout: 3m 0s
+- (Advanced Settings) Timeout: 5m 0s
 
 ### AWS Lambda Function Environment Variables
 
