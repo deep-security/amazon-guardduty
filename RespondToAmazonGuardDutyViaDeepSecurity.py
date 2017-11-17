@@ -234,6 +234,8 @@ def lambda_handler(event, context):
       "Recon:EC2/Portscan".lower(), # EC2 instance is performing outbound port scans against remote host
       "UnauthorizedAccess:EC2/SSHBruteForce".lower(), # A malicious actor has tried to access the EC2 instance over SSH repeatedly
       "UnauthorizedAccess:EC2/RDPBruteForce".lower(), # A malicious actor has tried to access the EC2 instance over RDP repeatedly
+      "Behavior:EC2/NetworkPortUnusual".lower(),
+      "Behavior:EC2/TrafficVolumeUnusual".lower(),
       ]:
 
       # run a recommendation scan
@@ -266,7 +268,10 @@ def lambda_handler(event, context):
         msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Details are available for this <{}|finding>. Deep Security is not protecting the instance. You can resolve this by <{}|deploying the Deep Security agent> to the instance and activating it".format(finding_url, dsa_install_url)
         send_to_slack(msg, event)
 
-    elif event_type.lower() == "UnauthorizedAccess:EC2/MaliciousIPCaller.Custom".lower(): # EC2 instance is communicating with a disallowed IP address on a threat list
+    elif event_type.lower() in [
+      "UnauthorizedAccess:EC2/MaliciousIPCaller.Custom".lower(), # EC2 instance is communicating with a disallowed IP address on a threat list
+      "UnauthorizedAccess:EC2/TorIPCaller".lower(), # EC2 instance is communicating via the Tor network
+      ]:
       # run a recommendation scan
       if instance_in_ds:
         print("Requested recommendation scan for instance {}".format(instance_id))

@@ -14,7 +14,7 @@ Combined together, Deep Security can use the intelligence and insight generated 
 
 This integration supports workflows around the following findings:
 
-- **Recon:EC2/PortProbeUnprotectedPort** when this finding is raised:
+- **Recon:EC2/PortProbeUnprotectedPort**, **Recon:EC2/Portscan**, **Behavior:EC2/NetworkPortUnusual**, or **Behavior:EC2/TrafficVolumeUnusual** when any of these findings are raised:
 	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
 	- If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
 
@@ -22,13 +22,13 @@ This integration supports workflows around the following findings:
 	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
 	- If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
 
-- **UnauthorizedAccess:EC2/MaliciousIPCaller.Custom** when this finding is raised:
+- **UnauthorizedAccess:EC2/MaliciousIPCaller.Custom** or **UnauthorizedAccess:EC2/TorIPCaller** when either of these findings are raised:
 	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
 	- Deep Security will run an integrity scan to ensure that critical files have not changed
 	- Deep Security will run a malware scan to look for infections or malicious activity
 	- If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
 
-- **UnauthorizedAccess:EC2/SSHBruteForce** or **UnauthorizedAccess:EC2/RDPBruteForce** when this finding is raised:
+- **UnauthorizedAccess:EC2/SSHBruteForce** or **UnauthorizedAccess:EC2/RDPBruteForce** when either of these findings are raised:
 	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
 	- Deep Security will run an integrity scan to ensure that critical files have not changed
 	- If requested, Deep Security will also enable intrusion prevention and integrity monitoring on the instance if it isn't already active
@@ -65,7 +65,7 @@ The intrusion prevention, integrity monitoring, and log inspection controls allo
 
 ![Automatically Implement Rule Recommendations](https://github.com/deep-security/amazon-guardduty/blob/master/docs/ds-automatically-apply-rules.png?raw=true "Automatically implement rule recommendations (when possible)")
 
-For the record, [Application Control is also very simple to use](https://help.deepsecurity.trendmicro.com/Protection-Modules/Application-Control/detect-drift.html?Highlight=application%20control) but should be built into your CI/CD workflow. 
+For the record, [Application Control is also very simple to use](https://help.deepsecurity.trendmicro.com/Protection-Modules/Application-Control/detect-drift.html?Highlight=application%20control) but should be built into your CI/CD work flow. 
 
 
 ## Permissions In Deep Security
