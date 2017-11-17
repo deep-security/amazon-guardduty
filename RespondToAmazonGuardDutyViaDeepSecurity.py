@@ -225,6 +225,8 @@ def lambda_handler(event, context):
     if instance_in_ds and "name" in dir(instance_in_ds):
         computer_name = instance_in_ds.name
     finding_id = event['id']
+    finding_url = "https://gd-preview.us-east-1.aws.amazon.com/guardduty/findings?search=id%{}".format(finding_id)
+    dsa_install_url = "https://help.deepsecurity.trendmicro.com/Get-Started/Install/install-dsa.html?Highlight=install%20agent"
 
     # route the event to a specific action
     if event_type.lower() in [
@@ -242,7 +244,8 @@ def lambda_handler(event, context):
         # make sure that IPS is on and active
         ips_result = enable_ips_for_instance_in_ds(instance_in_ds)
 
-        msg = "Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date.".format(computer_name)
+
+        msg = "Based on a suspicious <{}|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date.".format(finding_url, computer_name)
         if ips_result == "already enabled":
           msg += " Intrusion prevention is already active on this instance"
         elif ips_result == "enabled":
@@ -260,7 +263,7 @@ def lambda_handler(event, context):
 
         send_to_slack(msg, event)
       else:
-        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
+        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Details are available for this <{}|finding>. Deep Security is not protecting the instance. You can resolve this by <{}|deploying the Deep Security agent> to the instance and activating it".format(finding_url, dsa_install_url)
         send_to_slack(msg, event)
 
     elif event_type.lower() == "UnauthorizedAccess:EC2/MaliciousIPCaller.Custom".lower(): # EC2 instance is communicating with a disallowed IP address on a threat list
@@ -280,7 +283,7 @@ def lambda_handler(event, context):
         # make sure that IPS is on and active
         ips_result = enable_ips_for_instance_in_ds(instance_in_ds)
 
-        msg = "Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date. Deep Security is also running an integrity scan and a malware scan just in case.".format(computer_name)
+        msg = "Based on a suspicious <{}|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date. Deep Security is also running an integrity scan and a malware scan just in case.".format(finding_url, computer_name)
         if ips_result == "already enabled":
           msg += " Intrusion prevention is already active on this instance"
         elif ips_result == "enabled":
@@ -288,7 +291,7 @@ def lambda_handler(event, context):
 
         send_to_slack(msg, event)
       else:
-        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
+        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Details are available for this <{}|finding>. Deep Security is not protecting the instance. You can resolve this by <{}|deploying the Deep Security agent> to the instance and activating it".format(finding_url, dsa_install_url)
         send_to_slack(msg, event)
 
     elif "CryptoCurrency".lower() in event_type.lower(): # EC2 instance is communicating with known bitcoin destinations
@@ -299,14 +302,14 @@ def lambda_handler(event, context):
 
         am_result = enable_am_for_instance_in_ds(instance_in_ds)
 
-        msg = "Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date.".format(computer_name)
+        msg = "Based on a suspicious <{}|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date.".format(finding_url, computer_name)
         if am_result == "already enabled":
           msg += " Anti-malware protection is already active on this instance"
         elif am_result == "enabled":
           msg += " As a result, Deep Security has now activated anti-malware protection on this instance"
         send_to_slack(msg, event)
       else:
-        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
+        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Details are available for this <{}|finding>. Deep Security is not protecting the instance. You can resolve this by <{}|deploying the Deep Security agent> to the instance and activating it".format(finding_url, dsa_install_url)
         send_to_slack(msg, event)
 
     elif event_type.lower() in [
@@ -324,18 +327,18 @@ def lambda_handler(event, context):
         print("Requested integrity scan for instance {}".format(instance_id))
         instance_in_ds.scan_for_integrity()
 
-        msg = "Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for file integrity and malware.".format(computer_name)
+        msg = "Based on a suspicious <{}|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for file integrity and malware.".format(finding_url, computer_name)
         if am_result == "already enabled":
           msg += " Anti-malware protection is already active on this instance"
         elif am_result == "enabled":
           msg += " As a result, Deep Security has now activated anti-malware protection on this instance"
         send_to_slack(msg, event)
       else:
-        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
+        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Details are available for this <{}|finding>. Deep Security is not protecting the instance. You can resolve this by <{}|deploying the Deep Security agent> to the instance and activating it".format(finding_url, dsa_install_url)
         send_to_slack(msg, event)
 
     else:
-      msg = "Amazon GuardDuty generated a <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding>. Details are available within the Amazon GuardDuty Management Console"
+      msg = "Amazon GuardDuty generated a <{}|finding>. Details are available within the Amazon GuardDuty Management Console"
       send_to_slack(msg, event)
         
 
