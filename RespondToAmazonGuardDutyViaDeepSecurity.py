@@ -308,7 +308,10 @@ def lambda_handler(event, context):
         msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
         send_to_slack(msg, event)
 
-    elif "Backdoor:EC2".lower() in event_type.lower(): # the EC2 instance my be compromised in some way by malicious software
+    elif event_type.lower() in [
+      "Backdoor:EC2".lower(), # the EC2 instance my be compromised in some way by malicious software
+      "Trojan:EC2".lower(), # the EC2 instance my be compromised in some way by malicious software
+      ]:
       # Run an anti-malware scan on the affected instance to make sure it's not infected
       if instance_in_ds:
         print("Requested anti-malware scan for instance {}".format(instance_id))

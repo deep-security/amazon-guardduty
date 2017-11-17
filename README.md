@@ -42,6 +42,12 @@ This integration supports workflows around the following findings:
 	- Deep Security will run an integrity scan to ensure that critical files have not changed
 	- If requested, Deep Security will also enable anti-malware on the instance if it isn't already active
 	- Deep Security will not enable integrity monitoring because the instance may already be compromised, it will simply run a scan if integrity monitoring is already enable to detect any changes to critical files
+
+- **Trojan:EC2\*** when any of these findings are raised:
+	- Deep Security will run a malware scan to ensure the instance hasn't been infected
+	- Deep Security will run an integrity scan to ensure that critical files have not changed
+	- If requested, Deep Security will also enable anti-malware on the instance if it isn't already active
+	- Deep Security will not enable integrity monitoring because the instance may already be compromised, it will simply run a scan if integrity monitoring is already enable to detect any changes to critical files
  
 ## Support
 
