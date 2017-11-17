@@ -189,6 +189,13 @@ def lambda_handler(event, context):
           msg += " Instrusion prevention is already active on this instance"
         elif ips_result == "enabled":
           msg += " As a result, Deep Security has now activated intrusion prevention on this instance"
+
+        # run an integrity scan in cases of SSH brute force
+        if event_type.lower() == "UnauthorizedAccess:EC2/SSHBruteForce".lower():
+          instance_in_ds.scan_for_integrity()
+          msg += " Deep Security is also scanning the instance for integrity"
+          #integrity_result = ena
+
         send_to_slack(msg, event)
       else:
         msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
