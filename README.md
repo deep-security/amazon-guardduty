@@ -28,7 +28,7 @@ This integration supports workflows around the following findings:
 	- Deep Security will run a malware scan to look for infections or malicious activity
 	- If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
 
-- **UnauthorizedAccess:EC2/SSHBruteForce** when this finding is raised:
+- **UnauthorizedAccess:EC2/SSHBruteForce** or **UnauthorizedAccess:EC2/RDPBruteForce** when this finding is raised:
 	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
 	- Deep Security will run an integrity scan to ensure that critical files have not changed
 	- If requested, Deep Security will also enable intrusion prevention and integrity monitoring on the instance if it isn't already active
@@ -56,6 +56,14 @@ This is a community project and while you will see contributions from the Deep S
 Tutorials, feature-specific help, and other information about Deep Security is available from the [Deep Security Help Center](https://help.deepsecurity.trendmicro.com/Welcome.html). 
 
 For Deep Security specific issues, please use the regular Trend Micro support channels. For issues with the code in this repository, please [open an issue here on GitHub](https://github.com/deep-security/amazon-guarduty/issues).
+
+## Policies In Deep Security
+
+Deep Security uses policies to apply security controls and configurations to your EC2 instances and ECS hosts. These policies allow fine-grained control over the protection that Deep Security applies. **But** in most cases, you don't need to dive into the specifics. The anti-malware and web reputation controls are basically "set and forget". The firewall has limited use within AWS as security groups do a fantastic job (though you still may want a unified firewall across all environments or to leverage it's advanced logging capabilities). 
+
+The intrusion prevention, integrity monitoring, and log inspection controls allow for the automatic application of rules based on 
+
+![Automatically Implement Rule Recommendations](https://github.com/deep-security/amazon-guardduty/blob/master/docs/ds-automatically-apply-rules.png?raw=true "Automatically implement rule recommendations (when possible)")
 
 
 ## Permissions In Deep Security

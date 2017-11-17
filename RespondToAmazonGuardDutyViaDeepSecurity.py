@@ -230,7 +230,8 @@ def lambda_handler(event, context):
     if event_type.lower() in [
       "Recon:EC2/PortProbeUnprotectedPort".lower(), # EC2 instance has an unprotected port which is being probed by a known malicious host
       "Recon:EC2/Portscan".lower(), # EC2 instance is performing outbound port scans against remote host
-      "UnauthorizedAccess:EC2/SSHBruteForce".lower(), # A malicious actor has tried to access the C2 instance over SSH repeatedly
+      "UnauthorizedAccess:EC2/SSHBruteForce".lower(), # A malicious actor has tried to access the EC2 instance over SSH repeatedly
+      "UnauthorizedAccess:EC2/RDPBruteForce".lower(), # A malicious actor has tried to access the EC2 instance over RDP repeatedly
       ]:
 
       # run a recommendation scan
@@ -248,7 +249,7 @@ def lambda_handler(event, context):
           msg += " As a result, Deep Security has now activated intrusion prevention on this instance"
 
         # run an integrity scan in cases of SSH brute force
-        if event_type.lower() == "UnauthorizedAccess:EC2/SSHBruteForce".lower():
+        if event_type.lower() == "UnauthorizedAccess:EC2/SSHBruteForce".lower() or event_type.lower() == "UnauthorizedAccess:EC2/RDPBruteForce".lower():
           instance_in_ds.scan_for_integrity()
           msg += " Deep Security is also scanning the instance for integrity"
           integrity_result = enable_im_for_instance_in_ds(instance_in_ds)
