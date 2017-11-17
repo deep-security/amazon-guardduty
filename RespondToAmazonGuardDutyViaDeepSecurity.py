@@ -10,6 +10,7 @@ import urllib2
 # settings
 ENABLE_SLACK = False
 ENABLE_MODULES = False
+DSM = None
 
 def is_event_from_guardduty(event):
   """
@@ -106,13 +107,22 @@ def enable_ips_for_instance_in_ds(instance_in_ds):
   """
   For the specified Computer object, make sure that the IPS is on and active
   """
-  if instance_in_ds and ENABLE_MODULES:
+  result = None
+  if instance_in_ds and ENABLE_MODULES and DSM:
     if "on" in instance_in_ds.overall_intrusion_prevention_status.lower():
       # IPS is already on, do nothing
       print("IPS is already active for instance in DS {}".format(instance_in_ds.computer_name))
+      result = "already enabled"
     else:
       # turn on the IPS via hostSettingGet() / hostSettingSet()
-      print("Enalbing IPS for instance in DS {}".format(instance_in_ds.computer_name))
+      print("Enabling IPS for instance in DS {}".format(instance_in_ds.computer_name))
+      if DSM.policies.has_key(instance_in_ds.security_profile_id):
+        DSM.policies[instance_in_ds.security_profile_id].intrusion_prevention_state = "ON"
+        DSM.policies[instance_in_ds.security_profile_id].save()
+        print("Updated security policy {} by enabling intrusion prevention".format(DSM.policies[instance_in_ds.security_profile_id].name))
+        result = "enabled"
+
+  return result
 
 def lambda_handler(event, context):
   if is_event_from_guardduty(event):
@@ -143,7 +153,7 @@ def lambda_handler(event, context):
         instance_in_ds.scan_for_recommendations()
 
         # make sure that IPS is on and active
-        enable_ips_for_instance_in_ds(instance_in_ds)
+        ips_result = enable_ips_for_instance_in_ds(instance_in_ds)
 
     elif event_type.lower() == "Recon:EC2/Portscan".lower(): # EC2 instance is performing outbound port scans against remote host
       # run a recommendation scan
@@ -152,7 +162,7 @@ def lambda_handler(event, context):
         instance_in_ds.scan_for_recommendations()
 
         # make sure that IPS is on and active
-        enable_ips_for_instance_in_ds(instance_in_ds)
+        ips_result = enable_ips_for_instance_in_ds(instance_in_ds)
 
     elif event_type.lower() == "UnauthorizedAccess:EC2/MaliciousIPCaller.Custom".lower(): # EC2 instance is communicating with a disallowed IP address on a threat list
       # run a recommendation scan
@@ -169,7 +179,7 @@ def lambda_handler(event, context):
         instance_in_ds.scan_for_malware()
 
         # make sure that IPS is on and active
-        enable_ips_for_instance_in_ds(instance_in_ds)
+        ips_result = enable_ips_for_instance_in_ds(instance_in_ds)
 
     elif event_type.lower() == "UnauthorizedAccess:EC2/SSHBruteForce".lower(): # A malicious actor has tried to access the C2 instance over SSH repeatedly
       send_to_slack("Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date. Deep Security is also scanning for critical file integrity".format(computer_name), event)
