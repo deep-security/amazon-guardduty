@@ -14,9 +14,11 @@ Combined together, Deep Security can use the intelligence and insight generated 
 
 This integration supports workflows around the following findings:
 
-- *Recon:EC2/PortProbeUnprotectedPort* > when this finding is raised, Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy. If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
+- *Recon:EC2/PortProbeUnprotectedPort* when this finding is raised:
+	- Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy
+	- If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
 
-- *Recon:EC2/Portscan* > when this finding is raised, Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy. If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
+- *Recon:EC2/Portscan* when this finding is raised, Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy. If requested, Deep Security will also enable intrusion prevention on the instance if it isn't already active
 
 - *UnauthorizedAccess:EC2/MaliciousIPCaller.Custom* > when this finding is raised, Deep Security will run a recommendation scan to ensure the instance has an appropriate security policy. It will also run integrity and malware scans to spot abnormal or malicious behaviours. If requested, Deep Security will also enable intrusion prevention, anti-malware, and integrity monitoring on the instance if it isn't already active
 
