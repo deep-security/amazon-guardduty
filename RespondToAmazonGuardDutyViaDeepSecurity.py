@@ -264,6 +264,28 @@ def lambda_handler(event, context):
         msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
         send_to_slack(msg, event)
 
+    elif "Backdoor:EC2".lower() in event_type.lower(): # the EC2 instance my be compromised in some way by malicious software
+      # Run an anti-malware scan on the affected instance to make sure it's not infected
+      if instance_in_ds:
+        print("Requested anti-malware scan for instance {}".format(instance_id))
+        instance.scan_for_malware()
+
+        am_result = enable_am_for_instance_in_ds(instance_in_ds)
+
+        # run an integrity scan
+        print("Requested integrity scan for instance {}".format(instance_id))
+        instance_in_ds.scan_for_integrity()
+
+        msg = "Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for file integrity and malware.".format(computer_name)
+        if am_result == "already enabled":
+          msg += " Anti-malware protection is already active on this instance"
+        elif am_result == "enabled":
+          msg += " As a result, Deep Security has now activated anti-malware protection on this instance"
+        send_to_slack(msg, event)
+      else:
+        msg = "Amazon GuardDuty has noticed something suspicious about an EC2 instance running in your account. Deep Security is not protecting the instance. You can resolve this by deploying the Deep Security agent to the instance and activating it"
+        send_to_slack(msg, event)
+
     else:
       msg = "Amazon GuardDuty generated a <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding>. Details are available within the Amazon GuardDuty Management Console"
       send_to_slack(msg, event)
