@@ -93,9 +93,15 @@ AWS Lambda now encrypts environment variables by default using a service level k
   <td><i>Optional</i>. 0 for false, 1 for true. Use only when connecting to a Deep Security manager that is using a self-signed SSL certificate</td>
 </tr>
 <tr>
-	<td>SlackURL</td>
+	<td>slackURL</td>
 	<td>string</td>
 	<td><i>Optional</i>. The incoming webhook URL for the Slack team and channel you would like to send updates and findings to. These messages include contextual information as well as details on the actions taken as a result of the finding</td>
+</tr>
+<tr>
+	<td>enableModules</td>
+	<td>int (0 or 1)</td>
+  <td><i>Optional</i>. 0 for false, 1 for true. When true, the function will enable the required modules for specific actions (e.g., enable anti-malware in cases where a malware scan is warranted)</td>
+</tr>
 </table>
 
 During execution, this function will sign in to the Deep Security API. You should setup a dedicated API access account to do this. Deep Security contains a robust role-based access control (RBAC) framework which you can use to ensure that this set of credentials has the least amount of privileges to success. This function requires view and change access to one or more computers within Deep Security.

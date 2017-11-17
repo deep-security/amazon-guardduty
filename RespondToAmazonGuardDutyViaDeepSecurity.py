@@ -9,6 +9,7 @@ import urllib2
 
 # settings
 ENABLE_SLACK = False
+ENABLE_MODULES = False
 
 def is_event_from_guardduty(event):
   """
@@ -105,7 +106,7 @@ def enable_ips_for_instance_in_ds(instance_in_ds):
   """
   For the specified Computer object, make sure that the IPS is on and active
   """
-  if instance_in_ds:
+  if instance_in_ds and ENABLE_MODULES:
     if "on" in instance_in_ds.overall_intrusion_prevention_status.lower():
       # IPS is already on, do nothing
       print("IPS is already active for instance in DS {}".format(instance_in_ds.computer_name))
@@ -116,9 +117,14 @@ def enable_ips_for_instance_in_ds(instance_in_ds):
 def lambda_handler(event, context):
   if is_event_from_guardduty(event):
     # check the environment variables
-    if os.environ.has_key('SlackURL'):
+    if os.environ.has_key('slackURL'):
       global ENABLE_SLACK
       ENABLE_SLACK = True
+
+    if os.environ.has_key('enableModules'):
+      global ENABLE_MODULES
+      if int(os.environ['enableModules']) == 1:
+        ENABLE_MODULES = True
 
     event_type = event['detail']['type']
     print("Processing Amazon GuardDuty event of type [{}]".format(event_type))
