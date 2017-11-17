@@ -1,0 +1,115 @@
+{
+  "source": "aws.guardduty",
+  "account": "123456789012",
+  "version": "0",
+  "time": "1970-01-01T00:00:00Z",
+  "id": "8e143d62-1008-fdc1-8687-ef9690790e96",
+  "region": "us-east-1",
+  "detail": {
+    "description": "111.230.166.116 is performing SSH brute force attacks against i-08eb5518ab527d5aa. Brute force attacks are used to gain unauthorized access to your instance by guessing the SSH password.",
+    "updatedAt": "2017-11-17T00:33:15.578Z",
+    "schemaVersion": "2.0",
+    "id": "7cafe3b26b9d34205f2dbfc38339cfb3",
+    "createdAt": "2017-11-17T00:33:15.578Z",
+    "accountId": "123456789012",
+    "resource": {
+      "resourceType": "Instance",
+      "instanceDetails": {
+        "productCodes": [],
+        "availabilityZone": "us-east-1a",
+        "launchTime": 1510782306000,
+        "tags": [
+          {
+            "key": "role",
+            "value": "Server"
+          },
+          {
+            "key": "Name",
+            "value": "GD-Target"
+          }
+        ],
+        "instanceId": "i-08eb5518ab527d5aa",
+        "instanceState": "running",
+        "imageDescription": "Amazon Linux AMI 2017.09.1.20171103 x86_64 HVM GP2",
+        "instanceType": "t2.micro",
+        "networkInterfaces": [
+          {
+            "publicIp": "54.174.99.94",
+            "privateDnsName": "ip-172-31-61-233.ec2.internal",
+            "ipv6Addresses": [],
+            "vpcId": "vpc-3055b154",
+            "securityGroups": [
+              {
+                "groupName": "GuardDutyTarget",
+                "groupId": "sg-7609f003"
+              }
+            ],
+            "subnetId": "subnet-0060112b",
+            "privateIpAddresses": [
+              {
+                "privateDnsName": "ip-172-31-61-233.ec2.internal",
+                "privateIpAddress": "172.31.61.233"
+              }
+            ],
+            "publicDnsName": "ec2-54-174-99-94.compute-1.amazonaws.com",
+            "privateIpAddress": "172.31.61.233"
+          }
+        ],
+        "imageId": "ami-6057e21a"
+      }
+    },
+    "severity": 2,
+    "service": {
+      "count": 1,
+      "additionalInfo": {},
+      "archived": false,
+      "detectorId": "40af741b55a23aa6e848d0f2488b878a",
+      "eventFirstSeen": "2017-11-17T00:22:08Z",
+      "resourceRole": "TARGET",
+      "serviceName": "guardduty",
+      "action": {
+        "actionType": "NETWORK_CONNECTION",
+        "networkConnectionAction": {
+          "connectionDirection": "INBOUND",
+          "protocol": "TCP",
+          "remoteIpDetails": {
+            "organization": {
+              "org": "Tencent cloud computing",
+              "isp": "Beijing Faster Internet Technology Co.,Ltd",
+              "asn": 45090,
+              "asnOrg": "Shenzhen Tencent Computer Systems Company Limited"
+            },
+            "country": {
+              "countryName": "China"
+            },
+            "ipAddressV4": "111.230.166.116",
+            "geoLocation": {
+              "lat": 39.9289,
+              "lon": 116.3883
+            },
+            "city": {
+              "cityName": "Beijing"
+            }
+          },
+          "remotePortDetails": {
+            "portName": "Unknown",
+            "port": 33200
+          },
+          "localPortDetails": {
+            "portName": "SSH",
+            "port": 22
+          },
+          "blocked": false
+        }
+      },
+      "eventLastSeen": "2017-11-17T00:25:44Z"
+    },
+    "title": "111.230.166.116 is performing SSH brute force attacks against i-08eb5518ab527d5aa. ",
+    "region": "us-east-1",
+    "partition": "aws",
+    "arn": "arn:aws:guardduty:us-east-1:123456789012:detector/40af741b55a23aa6e848d0f2488b878a/finding/7cafe3b26b9d34205f2dbfc38339cfb3",
+    "type": "UnauthorizedAccess:EC2/SSHBruteForce"
+  },
+  "resources": [],
+  "detail-type": "GuardDuty Finding"
+}

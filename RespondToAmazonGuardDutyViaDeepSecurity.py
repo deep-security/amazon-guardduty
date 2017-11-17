@@ -1,14 +1,178 @@
 from __future__ import print_function
 
+# standard library
 import json
+import os
+import urllib2
 
-print('Loading function')
+# 3rd party dependencies
 
+# settings
+ENABLE_SLACK = False
+
+def is_event_from_guardduty(event):
+  """
+  Is this event from Amazon GuardDuty?
+  """
+  result = False
+
+  if event.has_key('source') and event['source'].lower() == 'aws.guardduty' and event.has_key('detail') and event['detail'].has_key('type'):
+    result = True
+
+  return result
+
+def send_to_slack(message, event):
+  """
+  Send the specified message to Slack
+  """
+  if not ENABLE_SLACK:
+    print("To enable Slack functionality, add the 'SlackURL' environment variable with the value set to the incoming webhook URL for your desired team/channel")
+    return False
+
+  msg = {
+    'username': 'Deep Security',
+    'icon_url': 'https://github.com/deep-security/amazon-guardduty/docs/deep-security.png?raw=true',
+    'text': message,
+    "attachments": [
+        {
+            "fallback": event['detail']['title'],
+            "color": "#36a64f",
+            "author_name": "Amazon GuardDuty Finding",
+            "author_link": "https://github.com/deep-security/amazon-guardduty/",
+            "author_icon": "https://github.com/deep-security/amazon-guardduty/docs/deep-security.png?raw=true",
+            "title": "{} - {}".format(event['detail']['title'], event['id']),
+            "title_link": "https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings/",
+            "text": "The finding is of type {} and has beens seen {} times. The last time was at {}".format(event['detail']['type'], event['detail']['service']['count'], event['detail']['service']['eventLastSeen']),
+            "fields": [
+                {
+                    "title": "Priority",
+                    "value": event['detail']['severity'],
+                    "short": False
+                }
+            ],
+            "image_url": "http://my-website.com/path/to/image.jpg",
+        }
+    ]
+  }
+  request = urllib2.Request(os.environ['SlackURL'])
+  request.add_header('Content-type', 'application/json')
+    
+  try:
+    response = urllib2.urlopen(request, json.dumps(msg))
+    print("Sent message to Slack. Received response {}".format(response))
+  except Exception, err:
+    print("Could not send the message to Slack. Threw exception: {}".format(err))
+
+def print_event(event):
+  try:
+        print("Received event: " + json.dumps(event))
+  except Exception, ex:
+      print(ex)
+  try:
+      print(event)
+  except Exception, ex:
+      print(ex)
+
+def get_affected_instance_in_deep_security(dsm, instance_id):
+  """
+  Find and return the specified instance in Deep Security
+
+  Returns a deepsecurity.computers.Computer object or None
+  """
+  result = None
+
+  try:
+    computers = dsm.computers.find(cloud_object_instance_id=instance_id)
+    if len(computers) > 0:
+      result = computers[0]
+  except Exception, ex:
+    print("Could not find the instance in Deep Security. Threw exception: {}".format(ex))
+
+  return result
+
+def get_affected_instance_id(event):
+  """
+  Get the instance ID of the affected instance in the finding
+  """
+  result = None
+  if event.has_key('detail') and event['detail'].has_key('resource') and event['detail']['resource'].has_key('instanceDetails') and event['detail']['resource']['instanceDetails'].has_key('instanceId'):
+    result = event['detail']['resource']['instanceDetails']['instanceId']
+    print("Finding is specific to instance [{}]".format(result))
+
+  return result
+
+def enable_ips_for_instance_in_ds(instance_in_ds):
+  """
+  For the specified Computer object, make sure that the IPS is on and active
+  """
+  if instance_in_ds:
+    if "on" in instance_in_ds.overall_intrusion_prevention_status.lower():
+      # IPS is already on, do nothing
+      print("IPS is already active for instance in DS {}".format(instance_in_ds.computer_name))
+    else:
+      # turn on the IPS via hostSettingGet() / hostSettingSet()
+      print("Enalbing IPS for instance in DS {}".format(instance_in_ds.computer_name))
 
 def lambda_handler(event, context):
-    #print("Received event: " + json.dumps(event, indent=2))
-    print("value1 = " + event['key1'])
-    print("value2 = " + event['key2'])
-    print("value3 = " + event['key3'])
-    return event['key1']  # Echo back the first key value
-    #raise Exception('Something went wrong')
+  if is_event_from_guardduty(event):
+    # check the environment variables
+    if os.environ.has_key('SlackURL'):
+      global ENABLE_SLACK
+      ENABLE_SLACK = True
+
+    event_type = event['detail']['type']
+    print("Processing Amazon GuardDuty event of type [{}]".format(event_type))
+
+    # get the relevant details regardless of action that needs to be taken
+    instance_id = get_affected_instance_id(event)
+    instance_in_ds = get_affected_instance_in_deep_security(None, instance_id)
+    computer_name = "Instance is not registered in Deep Security" if not instance else instance.computer_name
+    finding_id = event['id']
+
+    # route the event to a specific action
+    if event_type.lower() == "Recon:EC2/PortProbeUnprotectedPort".lower(): # EC2 instance has an unprotected port which is being probed by a known malicious host
+      # run a recommendation scan
+      if instance_in_ds:
+        print("Requested recommendation scan for instance {}".format(instance_id))
+        instance_in_ds.scan_for_recommendations()
+
+        # make sure that IPS is on and active
+        enable_ips_for_instance_in_ds(instance_in_ds)
+
+    elif event_type.lower() == "Recon:EC2/Portscan".lower(): # EC2 instance is performing outbound port scans against remote host
+      # run a recommendation scan
+      if instance_in_ds:
+        print("Requested recommendation scan for instance {}".format(instance_id))
+        instance_in_ds.scan_for_recommendations()
+
+        # make sure that IPS is on and active
+        enable_ips_for_instance_in_ds(instance_in_ds)
+
+    elif event_type.lower() == "UnauthorizedAccess:EC2/MaliciousIPCaller.Custom".lower(): # EC2 instance is communicating with a disallowed IP address on a threat list
+      # run a recommendation scan
+      if instance_in_ds:
+        print("Requested recommendation scan for instance {}".format(instance_id))
+        instance_in_ds.scan_for_recommendations()
+    
+        # run an integrity scan
+        print("Requested integrity scan for instance {}".format(instance_id))
+        instance_in_ds.scan_for_integrity()
+      
+        # run an anti-malware scan
+        print("Requested malware scan for instance {}".format(instance_id))
+        instance_in_ds.scan_for_malware()
+
+        # make sure that IPS is on and active
+        enable_ips_for_instance_in_ds(instance_in_ds)
+
+    elif event_type.lower() == "UnauthorizedAccess:EC2/SSHBruteForce".lower(): # A malicious actor has tried to access the C2 instance over SSH repeatedly
+      send_to_slack("Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date. Deep Security is also scanning for critical file integrity".format(computer_name), event)
+    elif "CryptoCurrency".lower() in event_type.lower(): # EC2 instance is communicating with known bitcoin destinations
+      # Run an anti-malware scan on the affected instance to make sure it's not infected
+      if instance:
+        print("Requested anti-malware scan for instance {}".format(instance_id))
+        instance.scan_for_malware()
+      send_to_slack("Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for malware".format(computer_name), event)
+  else:
+    print("Event received is not from Amazon GuardDuty")
+    print(event)

@@ -1,0 +1,134 @@
+{
+  "source": "aws.guardduty",
+  "account": "123456789012",
+  "version": "0",
+  "time": "1970-01-01T00:00:00Z",
+  "id": "5f2b58d9-63d1-a434-d5d4-af374f1de268",
+  "region": "us-east-1",
+  "detail": {
+    "description": "EC2 instance i-0e8dfbd8c13eca8ad is performing outbound port scans against remote host 34.201.172.46.",
+    "updatedAt": "2017-11-16T11:51:12.354Z",
+    "schemaVersion": "2.0",
+    "id": "4cafe255947104b9f0303dd49ff45f8a",
+    "createdAt": "2017-11-16T11:51:12.354Z",
+    "accountId": "123456789012",
+    "resource": {
+      "resourceType": "Instance",
+      "instanceDetails": {
+        "productCodes": [],
+        "availabilityZone": "us-east-1a",
+        "launchTime": 1510782186000,
+        "tags": [
+          {
+            "key": "Name",
+            "value": "WebServer-20A"
+          }
+        ],
+        "instanceId": "i-0e8dfbd8c13eca8ad",
+        "instanceState": "running",
+        "imageDescription": "Amazon Linux AMI 2017.09.1.20171103 x86_64 HVM GP2",
+        "instanceType": "t2.micro",
+        "networkInterfaces": [
+          {
+            "publicIp": "54.210.80.228",
+            "privateDnsName": "ip-172-31-53-125.ec2.internal",
+            "ipv6Addresses": [],
+            "vpcId": "vpc-3055b154",
+            "securityGroups": [
+              {
+                "groupName": "DeepDemo",
+                "groupId": "sg-f60da291"
+              }
+            ],
+            "subnetId": "subnet-0060112b",
+            "privateIpAddresses": [
+              {
+                "privateDnsName": "ip-172-31-53-125.ec2.internal",
+                "privateIpAddress": "172.31.53.125"
+              }
+            ],
+            "publicDnsName": "ec2-54-210-80-228.compute-1.amazonaws.com",
+            "privateIpAddress": "172.31.53.125"
+          }
+        ],
+        "imageId": "ami-6057e21a"
+      }
+    },
+    "severity": 5,
+    "service": {
+      "count": 1,
+      "additionalInfo": {
+        "portsScannedSample": [
+          146,
+          765,
+          514,
+          720,
+          254,
+          83,
+          110,
+          783,
+          801,
+          119,
+          873,
+          541,
+          406,
+          5000,
+          445,
+          23,
+          777,
+          992,
+          427,
+          5900
+        ]
+      },
+      "archived": false,
+      "detectorId": "40af741b55a23aa6e848d0f2488b878a",
+      "eventFirstSeen": "2017-11-16T11:48:09Z",
+      "resourceRole": "ACTOR",
+      "serviceName": "guardduty",
+      "action": {
+        "actionType": "NETWORK_CONNECTION",
+        "networkConnectionAction": {
+          "connectionDirection": "OUTBOUND",
+          "protocol": "TCP",
+          "remoteIpDetails": {
+            "organization": {
+              "org": "Amazon.com",
+              "isp": "Amazon.com",
+              "asn": 14618,
+              "asnOrg": "Amazon.com, Inc."
+            },
+            "country": {
+              "countryName": "United States"
+            },
+            "ipAddressV4": "34.201.172.46",
+            "geoLocation": {
+              "lat": 39.0481,
+              "lon": -77.4728
+            },
+            "city": {
+              "cityName": "Ashburn"
+            }
+          },
+          "remotePortDetails": {
+            "portName": "Unknown",
+            "port": 513
+          },
+          "localPortDetails": {
+            "portName": "Unknown",
+            "port": 37701
+          },
+          "blocked": false
+        }
+      },
+      "eventLastSeen": "2017-11-16T11:49:00Z"
+    },
+    "title": "Outbound portscan from EC2 instance i-0e8dfbd8c13eca8ad.",
+    "region": "us-east-1",
+    "partition": "aws",
+    "arn": "arn:aws:guardduty:us-east-1:123456789012:detector/40af741b55a23aa6e848d0f2488b878a/finding/4cafe255947104b9f0303dd49ff45f8a",
+    "type": "Recon:EC2/Portscan"
+  },
+  "resources": [],
+  "detail-type": "GuardDuty Finding"
+}

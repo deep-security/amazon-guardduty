@@ -1,1 +1,132 @@
-# amazon-guardduty
+# Deep Security Amazon GuardDuty Integration
+
+An AWS Lambda function to create a joint workflow between Amazon GuardDuty and Deep Security.
+
+## Support
+
+This is a community project and while you will see contributions from the Deep Security team, there is no official Trend Micro support for this project. The official documentation for the Deep Security APIs is available from the [Trend Micro Online Help Centre](http://docs.trendmicro.com/en-us/enterprise/deep-security.aspx). 
+
+Tutorials, feature-specific help, and other information about Deep Security is available from the [Deep Security Help Center](https://help.deepsecurity.trendmicro.com/Welcome.html). 
+
+For Deep Security specific issues, please use the regular Trend Micro support channels. For issues with the code in this repository, please [open an issue here on GitHub](https://github.com/deep-security/amazon-guarduty/issues).
+
+## Permissions In Deep Security
+
+Deep Security has a strong role-based access control (RBAC) system built in. In order for these AWS Lambda functions to query Deep Security, they require credentials to sign in.
+
+Here's the recommend configuration in order to implement this with the least amount of privileges possible within Deep Security.
+
+### Role
+
+1. Create a new Role with a unique, meaningful name  (Administration > User Manager > Roles > New...)
+1. Under "Access Type", check "Allow Access to web services API"
+1. Under "Access Type", **uncheck** "Allow Access to Deep Security Manager User Interface"
+1. On the "Computer Rights" tab, select either "All Computers" or "Selected Computers:" ensuring that only the greyed out "View" right (under "Allow Users to:") is selected
+1. On the "Policy Rights" tab, select "Selected Policies" and ensure that no policies are selected (this makes sure the role grants no rights to user for any policies)
+1. On the "User Rights" tab, ensure that "Change own password and contact information only" is selected
+1. On the "Other Rights" tab, ensure that the default options remain with only "View-Only" and "Hide" assigned as permissions
+
+### User
+
+1. Create a new User with a unique, meaningful name (Administration > User Manager > Users > New...)
+1. Set a unique, complex password
+1. Fill in other details as desired
+1. Set the Role to the role you created in the previous section.
+
+Make sure you assign the Role to the user. This will ensure that your API access has the minimal permissions possible, which reduces the risk if the credentials are exposed.
+
+## AWS Lambda Configuration
+
+For each of these rules, the AWS Lambda configuration is the same. Please make sure to configure the following;
+
+- Handler: filename_for_the_rule.aws_config_rule_handler
+- Role: a role with at least the rights as shown in [dsConfigRulePolicy.json](/dsConfigRulePolicy.json). **Remember** to change line 18 to reflect your S3 bucket information (BUCKET/PATH/TO/OBJECTS/*)
+- (Advanced Settings) Memory: 128 MB
+- (Advanced Settings) Timeout: 3m 0s
+
+### AWS Lambda Function Environment Variables
+
+AWS Lambda now encrypts environment variables by default using a service level key. If you want to, you can override this choice and use a speciifc key managed by KMS. The combination of encrypted by default and a strong RBAC strategy in Deep Security should be sufficient to address most threat models for most risk tolerance levels. If you want to use a specific key under KMS, please follow [the instructions](http://docs.aws.amazon.com/lambda/latest/dg/tutorial-env_console.html) in the AWS Lambda documentation.
+
+<table>
+<tr>
+  <th>Environment Variable</th>
+  <th>Expected Value Type</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>dsUsername</td>
+  <td>string</td>
+  <td>The username of the Deep Security account to use for querying anti-malware status</td>
+</tr>
+<tr>
+  <td>dsPassword</td>
+  <td>string</td>
+  <td>The password for the Deep Security account to use for querying anti-malware status. This password is readable by any identity that can access the AWS Lambda function. Use only the bare minimum permissions within Deep Security (see note below)</td>
+</tr>
+<tr>
+  <td>dsTenant</td>
+  <td>string</td>
+  <td><i>Optional as long as dsHostname is specified</i>. Indicates which tenant to sign in to within Deep Security</td>
+</tr>
+<tr>
+  <td>dsHostname</td>
+  <td>string</td>
+  <td><i>Optional as long as dsTenant is specified</i>. Defaults to Deep Security as a Service. Indicates which Deep Security manager the rule should sign in to</td>
+</tr>
+<tr>
+  <td>dsPort</td>
+  <td>int</td>
+  <td><i>Optional</i>. Defaults to 443. Indicates the port to connect to the Deep Security manager on</td>
+</tr>
+<tr>
+  <td>dsIgnoreSslValidation</td>
+  <td>int (0 or 1)</td>
+  <td><i>Optional</i>. 0 for false, 1 for true. Use only when connecting to a Deep Security manager that is using a self-signed SSL certificate</td>
+</tr>
+<tr>
+	<td>SlackURL</td>
+	<td>string</td>
+	<td><i>Optional</i>. The incoming webhook URL for the Slack team and channel you would like to send updates and findings to. These messages include contextual information as well as details on the actions taken as a result of the finding</td>
+</table>
+
+During execution, this function will sign in to the Deep Security API. You should setup a dedicated API access account to do this. Deep Security contains a robust role-based access control (RBAC) framework which you can use to ensure that this set of credentials has the least amount of privileges to success. This function requires view and change access to one or more computers within Deep Security.
+
+### SSL Certificate Validation
+
+If the Deep Security Manager (DSM) you're connecting to was installed via software of the AWS Marketplace, there's a chance that it is still using the default, self-signed SSL certificate. By default, python checks the certificate for validity which it cannot do with self-signed certificates.
+
+If you are using self-signed certificates, please use the ```dsIgnoreSslValidation``` environment variable.
+
+When you use this variable, you're telling python to ignore any certificate warnings. These warnings should be due to the self-signed certificate but *could* be for other reasons. It is strongly recommended that you have alternative mitigations in place to secure your DSM. 
+
+When the flag is set, you'll see this warning block in the logs;
+
+```bash
+***********************************************************************
+* IGNORING SSL CERTIFICATE VALIDATION
+* ===================================
+* You have requested to ignore SSL certificate validation. This is a less secure method 
+* of connecting to a Deep Security Manager (DSM). Please ensure that you have other 
+* mitigations and security controls in place (like restricting IP space that can access 
+* the DSM, implementing least privilege for the Deep Security user/role accessing the 
+* API, etc).
+*
+* During script execution, you'll see a number of "InsecureRequestWarning" messages. 
+* These are to be expected when operating without validation. 
+***********************************************************************
+```
+
+And during execution you may see lines similar to;
+
+```python
+.../requests/packages/urllib3/connectionpool.py:789: InsecureRequestWarning: Unverified HTTPS request is being made. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.org/en/latest/security.html
+```
+
+These are expected warnings. Can you tell that we (and the python core teams) are trying to tell you something? If you're interesting in using a valid SSL certificate, you can get one for free from [Let's Encrypt](https://letsencrypt.org), [AWS themselves](https://aws.amazon.com/certificate-manager/) (if your DSM is behind an ELB), or explore commercial options (like the [one from Trend Micro](http://www.trendmicro.com/us/enterprise/cloud-solutions/deep-security/ssl-certificates/)).
+
+## Testing
+
+Generating fi
+
+```nnamp -sX DESTINATION_IP```

@@ -1,0 +1,114 @@
+{
+  "source": "aws.guardduty",
+  "account": "123456789012",
+  "version": "0",
+  "time": "1970-01-01T00:00:00Z",
+  "id": "76d39f31-1ad2-4bcd-6cbb-ff458105947b",
+  "region": "us-east-1",
+  "detail": {
+    "description": "EC2 instance i-0e8dfbd8c13eca8ad is communicating with a disallowed IP address 34.201.172.46 on the list KnownBad.",
+    "updatedAt": "2017-11-16T04:39:45.473Z",
+    "schemaVersion": "2.0",
+    "id": "f0afe19014013a0dbcccc845d4ed5a55",
+    "createdAt": "2017-11-16T04:39:45.410Z",
+    "accountId": "123456789012",
+    "resource": {
+      "resourceType": "Instance",
+      "instanceDetails": {
+        "productCodes": [],
+        "availabilityZone": "us-east-1a",
+        "launchTime": 1510782186000,
+        "tags": [
+          {
+            "key": "Name",
+            "value": "WebServer-20A"
+          }
+        ],
+        "instanceId": "i-0e8dfbd8c13eca8ad",
+        "instanceState": "running",
+        "imageDescription": "Amazon Linux AMI 2017.09.1.20171103 x86_64 HVM GP2",
+        "instanceType": "t2.micro",
+        "networkInterfaces": [
+          {
+            "publicIp": "54.210.80.228",
+            "privateDnsName": "ip-172-31-53-125.ec2.internal",
+            "ipv6Addresses": [],
+            "vpcId": "vpc-3055b154",
+            "securityGroups": [
+              {
+                "groupName": "DeepDemo",
+                "groupId": "sg-f60da291"
+              }
+            ],
+            "subnetId": "subnet-0060112b",
+            "privateIpAddresses": [
+              {
+                "privateDnsName": "ip-172-31-53-125.ec2.internal",
+                "privateIpAddress": "172.31.53.125"
+              }
+            ],
+            "publicDnsName": "ec2-54-210-80-228.compute-1.amazonaws.com",
+            "privateIpAddress": "172.31.53.125"
+          }
+        ],
+        "imageId": "ami-6057e21a"
+      }
+    },
+    "severity": 5,
+    "service": {
+      "count": 20,
+      "additionalInfo": {
+        "threatName": "Customer Threat Intel",
+        "threatListName": "KnownBad"
+      },
+      "archived": false,
+      "detectorId": "40af741b55a23aa6e848d0f2488b878a",
+      "eventFirstSeen": "2017-11-16T04:37:55Z",
+      "resourceRole": "TARGET",
+      "serviceName": "guardduty",
+      "action": {
+        "actionType": "NETWORK_CONNECTION",
+        "networkConnectionAction": {
+          "connectionDirection": "UNKNOWN",
+          "protocol": "TCP",
+          "remoteIpDetails": {
+            "organization": {
+              "org": "Amazon.com",
+              "isp": "Amazon.com",
+              "asn": 14618,
+              "asnOrg": "Amazon.com, Inc."
+            },
+            "country": {
+              "countryName": "United States"
+            },
+            "ipAddressV4": "34.201.172.46",
+            "geoLocation": {
+              "lat": 39.0481,
+              "lon": -77.4728
+            },
+            "city": {
+              "cityName": "Ashburn"
+            }
+          },
+          "remotePortDetails": {
+            "portName": "Unknown",
+            "port": 5811
+          },
+          "localPortDetails": {
+            "portName": "Unknown",
+            "port": 51062
+          },
+          "blocked": false
+        }
+      },
+      "eventLastSeen": "2017-11-16T04:34:53Z"
+    },
+    "title": "EC2 instance i-0e8dfbd8c13eca8ad communicating with disallowed IP address.",
+    "region": "us-east-1",
+    "partition": "aws",
+    "arn": "arn:aws:guardduty:us-east-1:123456789012:detector/40af741b55a23aa6e848d0f2488b878a/finding/f0afe19014013a0dbcccc845d4ed5a55",
+    "type": "UnauthorizedAccess:EC2/MaliciousIPCaller.Custom"
+  },
+  "resources": [],
+  "detail-type": "GuardDuty Finding"
+}
