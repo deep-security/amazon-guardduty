@@ -142,6 +142,27 @@ def enable_am_for_instance_in_ds(instance_in_ds):
         print("Updated security policy {} by enabling anti-malware".format(DSM.policies[instance_in_ds.security_profile_id].name))
         result = "enabled"
 
+  return result
+
+def enable_im_for_instance_in_ds(instance_in_ds):
+  """
+  For the specified Computer object, make sure that integrity monitoring is on and active
+  """
+  result = None
+  if instance_in_ds and ENABLE_MODULES and DSM:
+    if "on" in instance_in_ds.overall_integrity_monitoring_status.lower():
+      # IPS is already on, do nothing
+      print("Integrity monitoring is already active for instance in DS {}".format(instance_in_ds.computer_name))
+      result = "already enabled"
+    else:
+      # turn on the IPS via hostSettingGet() / hostSettingSet()
+      print("Enabling IPS for instance in DS {}".format(instance_in_ds.computer_name))
+      if DSM.policies.has_key(instance_in_ds.security_profile_id):
+        DSM.policies[instance_in_ds.security_profile_id].integrity_monitoring_state = "ON"
+        DSM.policies[instance_in_ds.security_profile_id].save()
+        print("Updated security policy {} by enabling integrity monitoring".format(DSM.policies[instance_in_ds.security_profile_id].name))
+        result = "enabled"
+
   return result  
 
 def lambda_handler(event, context):
@@ -186,7 +207,7 @@ def lambda_handler(event, context):
 
         msg = "Based on a suspicious <https://gd-preview.us-east-1.aws.amazon.com/guardduty/home?#/findings|finding> in Amazon GuardDuty, Deep Security is now scanning computer {} for rule recommendations to ensure the security profile is accurate and up to date.".format(computer_name)
         if ips_result == "already enabled":
-          msg += " Instrusion prevention is already active on this instance"
+          msg += " Intrusion prevention is already active on this instance"
         elif ips_result == "enabled":
           msg += " As a result, Deep Security has now activated intrusion prevention on this instance"
 
@@ -194,7 +215,11 @@ def lambda_handler(event, context):
         if event_type.lower() == "UnauthorizedAccess:EC2/SSHBruteForce".lower():
           instance_in_ds.scan_for_integrity()
           msg += " Deep Security is also scanning the instance for integrity"
-          #integrity_result = ena
+          integrity_result = enable_im_for_instance_in_ds(instance_in_ds)
+          if integrity_result == "already enabled":
+            msg += " Integrity monitoring is already active on this instance"
+          elif ips_result == "enabled":
+            msg += " As a result of the finding, Deep Security has now activated integrity monitoring on this instance"
 
         send_to_slack(msg, event)
       else:
